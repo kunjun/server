@@ -13,7 +13,7 @@ import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.persistence.MemorySessionStore;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 
@@ -26,7 +26,7 @@ public class UploadDeviceTokenHandler extends IMHandler<WFCMessage.UploadDeviceT
             session.setAppName(request.getAppName());
             if (request.getPlatform() == ProtoConstants.Platform.Platform_iOS && request.getPushType() == 2) {
                 session.setVoipDeviceToken(request.getDeviceToken());
-                session.setPushType(0);//如果有voip token，肯定是生产环境的推送
+//                session.setPushType(0);//如果有voip token，肯定是生产环境的推送
                 m_sessionsStore.updateSessionToken(session, true);
             } else {
                 session.setDeviceToken(request.getDeviceToken());

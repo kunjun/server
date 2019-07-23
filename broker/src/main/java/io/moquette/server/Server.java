@@ -102,6 +102,7 @@ public class Server {
         instance = new Server();
         final IConfig config = defaultConfig();
 
+        System.setProperty("hazelcast.logging.type", "none" );
         instance.mConfig = config;
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
 
@@ -111,6 +112,8 @@ public class Server {
         int httpAdminPort = Integer.parseInt(config.getProperty(BrokerConstants.HTTP_ADMIN_PORT));
 
         AdminAction.setSecretKey(config.getProperty(HTTP_SERVER_SECRET_KEY));
+        AdminAction.setNoCheckTime(config.getProperty(HTTP_SERVER_API_NO_CHECK_TIME));
+
         final LoServer httpServer = new LoServer(httpLocalPort, httpAdminPort, instance.m_processor.getMessagesStore(), instance.m_store.sessionsStore());
         try {
             httpServer.start();
@@ -125,6 +128,8 @@ public class Server {
         //Bind  a shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(instance::stopServer));
         Runtime.getRuntime().addShutdownHook(new Thread(httpServer::shutdown));
+
+        System.out.println("Wildfire IM server start success...");
     }
 
     /**
@@ -370,7 +375,8 @@ public class Server {
             throw new IllegalArgumentException("nodeId error: " + nodeIdStr);
         }
         if (nodeIdSet != null && nodeIdSet.contains(nodeId)){
-            throw new IllegalArgumentException("nodeId conflict " + nodeId + ", 请修改wildfirechat.conf文件，是各个节点的nodeId不冲突");
+            LOG.error("只允许一个实例运行，多个实例会引起冲突，进程终止");
+            System.exit(-1);
         }
 
         MessageShardingUtil.setNodeId(nodeId);

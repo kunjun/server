@@ -143,7 +143,8 @@ public class ProtocolProcessor {
         LOG.info("Processing CONNECT message. CId={}, username={}", clientId, payload.userName());
 
         if (msg.variableHeader().version() != MqttVersion.MQTT_3_1.protocolLevel()
-                && msg.variableHeader().version() != MqttVersion.MQTT_3_1_1.protocolLevel()) {
+                && msg.variableHeader().version() != MqttVersion.MQTT_3_1_1.protocolLevel()
+                && msg.variableHeader().version() != MqttVersion.Wildfire_1.protocolLevel()) {
             MqttConnAckMessage badProto = connAck(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
 
             LOG.error("MQTT protocol version is not valid. CId={}", clientId);
@@ -162,7 +163,8 @@ public class ProtocolProcessor {
         }
 
 
-        if (!login(channel, msg, clientId)) {
+        MqttVersion mqttVersion = MqttVersion.fromProtocolLevel(msg.variableHeader().version());
+        if (!login(channel, msg, clientId, mqttVersion)) {
             channel.close();
             return;
         }
@@ -238,7 +240,7 @@ public class ProtocolProcessor {
         MqttConnAckVariableHeader mqttConnAckVariableHeader = new MqttConnAckVariableHeader(returnCode, sessionPresent);
         return new MqttConnAckMessage(mqttFixedHeader, mqttConnAckVariableHeader, new MqttConnectAckPayload(data));
     }
-    private boolean login(Channel channel, MqttConnectMessage msg, final String clientId) {
+    private boolean login(Channel channel, MqttConnectMessage msg, final String clientId, MqttVersion mqttVersion) {
         // handle user authentication
         if (msg.variableHeader().hasUserName()) {
             int status = m_messagesStore.getUserStatus(msg.payload().userName());
@@ -251,11 +253,16 @@ public class ProtocolProcessor {
                 pwd = msg.payload().password();
 
                 MemorySessionStore.Session session = m_sessionsStore.getSession(clientId);
+                if (session == null) {
+                    m_sessionsStore.createNewSession(msg.payload().userName(), clientId, true, false);
+                    session = m_sessionsStore.getSession(clientId);
+                }
+                
                 if (session != null && session.getUsername().equals(msg.payload().userName())) {
                     pwd = AES.AESDecrypt(pwd, session.getSecret(), true);
                 } else {
                     LOG.error("Password decrypt failed of client {}", clientId);
-                    failedCredentials(channel);
+                    failedNoSession(channel);
                     return false;
                 }
 
@@ -264,6 +271,7 @@ public class ProtocolProcessor {
                     failedCredentials(channel);
                     return false;
                 }
+                session.setMqttVersion(mqttVersion);
             } else if (!this.allowAnonymous) {
                 LOG.error("Client didn't supply any password and MQTT anonymous mode is disabled CId={}", clientId);
                 failedCredentials(channel);
@@ -362,6 +370,11 @@ public class ProtocolProcessor {
 
     private void failedCredentials(Channel session) {
         session.writeAndFlush(connAck(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD));
+        LOG.info("Client {} failed to connect with bad username or password.", session);
+    }
+
+    private void failedNoSession(Channel session) {
+        session.writeAndFlush(connAck(CONNECTION_REFUSED_SESSION_NOT_EXIST));
         LOG.info("Client {} failed to connect with bad username or password.", session);
     }
 
@@ -610,7 +623,8 @@ public class ProtocolProcessor {
 
     public void onRpcMsg(String fromUser, String clientId, byte[] message, int messageId, String from, String request, boolean isAdmin) {
         if(request.equals(RPCCenter.KICKOFF_USER_REQUEST)) {
-            mServer.getImBusinessScheduler().execute(()->handleTargetRemovedFromCurrentNode(new TargetEntry(TargetEntry.Type.TARGET_TYPE_USER, from)));
+            String userId = new String(message);
+            mServer.getImBusinessScheduler().execute(()->handleTargetRemovedFromCurrentNode(new TargetEntry(TargetEntry.Type.TARGET_TYPE_USER, userId)));
             return;
         }
         qos1PublishHandler.onRpcMsg(fromUser, clientId, message, messageId, from, request, isAdmin);

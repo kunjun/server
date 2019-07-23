@@ -14,6 +14,7 @@ public interface IMTopic {
 	String PullMessageTopic = "MP";
 	String NotifyMessageTopic = "MN";
     String NotifyRecallMessageTopic = "RMN";
+    String BroadcastMessageTopic = "MBC";
 
     String GetUserSettingTopic = "UG";
     String PutUserSettingTopic = "UP";
@@ -29,7 +30,7 @@ public interface IMTopic {
     String GetGroupInfoTopic = "GPGI";
     String GetGroupMemberTopic = "GPGM";
     String TransferGroupTopic = "GTG";
-
+    String SetGroupManagerTopic = "GSM";
 
     String GetUserInfoTopic = "UPUI";
     String ModifyMyInfoTopic = "MMI";

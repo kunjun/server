@@ -8,19 +8,19 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.InputGetUserInfo;
-import com.xiaoleilu.loServer.pojos.OutputCreateUser;
+import cn.wildfirechat.pojos.InputGetUserInfo;
 import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.internal.StringUtil;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 
-@Route("/admin/user/onlinestatus")
+@Route(APIPath.User_Get_Online_Status)
 @HttpMethod("POST")
 public class CheckUserOnlineAction extends AdminAction {
 

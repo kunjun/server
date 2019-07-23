@@ -1,21 +1,16 @@
 package net.xmeter.samplers;
 
-import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
-import com.xiaoleilu.loServer.pojos.InputRoute;
-import com.xiaoleilu.loServer.pojos.InputGetToken;
-import com.xiaoleilu.loServer.pojos.OutputGetIMTokenData;
-import io.moquette.spi.impl.security.AES;
+import cn.wildfirechat.pojos.InputGetToken;
+import cn.wildfirechat.pojos.OutputGetIMTokenData;
 import net.xmeter.IMResult;
 import net.xmeter.Util;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jmeter.samplers.AbstractSampler;
 
@@ -24,11 +19,9 @@ import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.Base64;
 
 public abstract class AbstractMQTTSampler extends AbstractSampler implements Constants {
     private transient static Logger logger = LoggingManager.getLoggerForClass();
@@ -188,8 +181,8 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
     protected String privateSecret;
     protected String token;
 
-    protected boolean getToken(String userId) {
-        String url = "http://" + getServer() + ":18080/admin/user/token";
+    protected boolean getToken(String userId, String clientId) {
+        String url = "http://" + getServer() + ":18080/admin/user/get_token";
         String adminSecret = "123456";
         HttpPost post = null;
         try {
@@ -208,7 +201,7 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
             post.setHeader("timestamp", "" + timestamp);
             post.setHeader("sign", sign);
 
-            String jsonStr = new Gson().toJson(new InputGetToken(userId, getClientId()));
+            String jsonStr = new Gson().toJson(new InputGetToken(userId, clientId));
             logger.info("http request content: " +  jsonStr);
 
             StringEntity entity = new StringEntity(jsonStr, Charset.forName("UTF-8"));
@@ -243,30 +236,8 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
                 }
 
                 OutputGetIMTokenData out = result.getResult();
-                if (out != null && out.getToken() != null) {
-                    byte[] data = Base64.getDecoder().decode(token);
-                    if (data != null) {
-                        data = AES.AESDecrypt(data, commonSecret, false);
-
-                        if (data != null) {
-                            String s = new String(data);
-                            String[] ss = s.split("\\|");
-                            if (ss.length == 3) {
-                                this.token = ss[0];
-                                this.privateSecret = ss[1];
-                                return true;
-                            } else {
-                                logger.info("get token keys not correct (" + s + ")");
-                            }
-                        } else {
-                            logger.info("get token decode token failure");
-                        }
-                    } else {
-                        logger.info("get token decode base64 failure");
-                    }
-                } else {
-                    logger.info("get token data invalide");
-                }
+                token = out.getToken();
+                return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -285,78 +256,4 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
             .build();
         return new Gson().fromJson(content, type);
     }
-
-	protected boolean route(String userId, String token) {
-		HttpPost httpPost;
-		try{
-			HttpClient httpClient = new DefaultHttpClient();
-			httpPost = new HttpPost("http://" + getServer() + ":" + getPort() + "/route");
-			String cid = Base64.getEncoder().encodeToString(AES.AESEncrypt(getClientId().getBytes(), commonSecret));
-			httpPost.setHeader("cid", cid);
-
-            String uid = Base64.getEncoder().encodeToString(AES.AESEncrypt(userId.getBytes(), commonSecret));
-            httpPost.setHeader("uid", uid);
-
-			InputRoute inputRoute = new InputRoute();
-			inputRoute.setUserId(userId);
-			inputRoute.setClientId(getClientId());
-			inputRoute.setToken(token);
-
-            WFCMessage.RouteRequest routeRequest = WFCMessage.RouteRequest.newBuilder().setApp("jmeter.test").setSdkVersion("0.1").build();
-            WFCMessage.IMHttpWrapper request = WFCMessage.IMHttpWrapper.newBuilder().setClientId(getClientId()).setToken(token).setRequest("ROUTE").setData(routeRequest.toByteString()).build();
-            byte[] data = AES.AESEncrypt(request.toByteArray(), privateSecret   );
-            data = Base64.getEncoder().encode(data);
-
-
-			StringEntity entity = new StringEntity(new String(data), Charset.forName("UTF-8"));
-			entity.setContentEncoding("UTF-8");
-			entity.setContentType("application/json");
-			httpPost.setEntity(entity);
-
-
-			HttpResponse response = httpClient.execute(httpPost);
-			if(response != null){
-			    if (response.getStatusLine().getStatusCode() != 200) {
-			        logger.error("Http response error {" + response.getStatusLine().getStatusCode() + "}");
-			        return false;
-                }
-				HttpEntity resEntity = response.getEntity();
-				if(resEntity != null){
-
-                    try {
-
-                        byte[] contentbyte = new byte[(int)response.getEntity().getContentLength()];
-                        int readLen = response.getEntity().getContent().read(contentbyte);
-
-                        data = new byte[contentbyte.length - 1];
-                        for (int i = 0; i < data.length; i++) {
-                            data[i] = contentbyte[i+1];
-                        }
-
-                        data = AES.AESDecrypt(data, privateSecret, true);
-
-                        WFCMessage.RouteResponse routeResponse = WFCMessage.RouteResponse.parseFrom(data);
-                        mqttServerIp = routeResponse.getHost();
-                        mqttServerPort = routeResponse.getLongPort();
-                        routeResponse.getShortPort();
-                        return true;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        logger.error(e.toString());
-                    } catch (UnsupportedOperationException e) {
-                        e.printStackTrace();
-                        logger.error(e.toString());
-                    }
-				} else {
-				    logger.error("route response entry is nil");
-                }
-			} else {
-			    logger.error("Http response nil");
-            }
-		}catch(IOException ex){
-			ex.printStackTrace();
-            logger.error(ex.toString());
-		}
-		return false;
-	}
 }

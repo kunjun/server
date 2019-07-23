@@ -11,7 +11,7 @@ package io.moquette.imhandler;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import java.util.LinkedHashSet;
@@ -33,7 +33,7 @@ public class RecallMessageHandler extends IMHandler<WFCMessage.INT64Buf> {
             return ErrorCode.ERROR_CODE_NOT_EXIST;
         }
 
-        m_messagesStore.getNotifyReceivers(fromUser, message, notifyReceivers);
+        m_messagesStore.getNotifyReceivers(fromUser, message.toBuilder(), notifyReceivers);
         this.publisher.publishRecall2Receivers(int64Buf.getId(), fromUser, notifyReceivers, clientID);
 
         return errorCode;

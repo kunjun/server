@@ -13,22 +13,26 @@ import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.action.Action;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.InputCreateUser;
-import io.moquette.persistence.RPCCenter;
-import io.moquette.spi.impl.Utils;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.codec.digest.DigestUtils;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.RateLimiter;
 
 abstract public class AdminAction extends Action {
     private static String SECRET_KEY = "123456";
+    private static boolean NO_CHECK_TIME = false;
     private final RateLimiter mLimitCounter = new RateLimiter(10, 500);
     public static void setSecretKey(String secretKey) {
         SECRET_KEY = secretKey;
+    }
+
+    public static void setNoCheckTime(String noCheckTime) {
+        try {
+            NO_CHECK_TIME = Boolean.parseBoolean(noCheckTime);
+        } catch (Exception e) {
+
+        }
     }
 
     @Override
@@ -51,8 +55,8 @@ abstract public class AdminAction extends Action {
             return ErrorCode.INVALID_PARAMETER;
         }
 
-        if (System.currentTimeMillis() - ts > 2 * 60 * 60 * 1000) {
-//            return ErrorCode.ERROR_CODE_SIGN_EXPIRED;
+        if (!NO_CHECK_TIME && System.currentTimeMillis() - ts > 2 * 60 * 60 * 1000) {
+            return ErrorCode.ERROR_CODE_SIGN_EXPIRED;
         }
 
         String str = nonce + "|" + SECRET_KEY + "|" + timestamp;

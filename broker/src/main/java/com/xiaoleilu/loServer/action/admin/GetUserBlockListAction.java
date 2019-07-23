@@ -8,6 +8,8 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
+import cn.wildfirechat.pojos.OutputUserBlockStatusList;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
@@ -17,7 +19,7 @@ import com.xiaoleilu.loServer.handler.Response;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-@Route("admin/user/statuslist")
+@Route(APIPath.User_Get_Blocked_List)
 @HttpMethod("POST")
 public class GetUserBlockListAction extends AdminAction {
 
@@ -30,7 +32,9 @@ public class GetUserBlockListAction extends AdminAction {
     public boolean action(Request request, Response response) {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
             response.setStatus(HttpResponseStatus.OK);
-            RestResult result = RestResult.ok(messagesStore.getUserStatusList());
+            OutputUserBlockStatusList list = new OutputUserBlockStatusList();
+            list.setStatusList(messagesStore.getUserStatusList());
+            RestResult result = RestResult.ok(list);
             response.setContent(new Gson().toJson(result));
         }
         return true;

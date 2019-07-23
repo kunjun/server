@@ -19,10 +19,9 @@ package io.moquette.spi;
 import cn.wildfirechat.proto.WFCMessage;
 import io.moquette.persistence.MemorySessionStore.Session;
 import io.moquette.spi.IMessagesStore.StoredMessage;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Queue;
 
 /**
@@ -41,7 +40,7 @@ public interface ISessionsStore {
 
     Session createUserSession(String username, String clientID);
 
-    ErrorCode createNewSession(String username, String clientID, boolean cleanSession);
+    ErrorCode createNewSession(String username, String clientID, boolean cleanSession, boolean createNoExist);
 
     ClientSession updateExistSession(String username, String clientID, WFCMessage.RouteRequest endpoint, boolean cleanSession);
 

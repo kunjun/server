@@ -23,12 +23,10 @@ import io.moquette.spi.ClientSession;
 import io.moquette.spi.IMessagesStore.StoredMessage;
 import io.moquette.spi.ISessionsStore;
 
-import io.netty.util.internal.StringUtil;
+import io.netty.handler.codec.mqtt.MqttVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import win.liyufan.im.ErrorCode;
-import win.liyufan.im.UserSettingScope;
-import win.liyufan.im.Utility;
+import cn.wildfirechat.common.ErrorCode;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -51,6 +49,8 @@ public class MemorySessionStore implements ISessionsStore {
         private long lastChatroomActiveTime;
 
         private volatile int unReceivedMsgs;
+
+        private MqttVersion mqttVersion = MqttVersion.MQTT_3_1_1;
 
         public long getLastActiveTime() {
             return lastActiveTime;
@@ -233,7 +233,13 @@ public class MemorySessionStore implements ISessionsStore {
 		}
 
 
-        
+        public MqttVersion getMqttVersion() {
+            return mqttVersion;
+        }
+
+        public void setMqttVersion(MqttVersion mqttVersion) {
+            this.mqttVersion = mqttVersion;
+        }
     }
 
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
@@ -285,7 +291,7 @@ public class MemorySessionStore implements ISessionsStore {
 
 
     @Override
-    public ErrorCode createNewSession(String username, String clientID, boolean cleanSession) {
+    public ErrorCode createNewSession(String username, String clientID, boolean cleanSession, boolean createWhenNoExist) {
         LOG.debug("createNewSession for client <{}>", clientID);
 
         Session session = sessions.get(clientID);
@@ -299,6 +305,10 @@ public class MemorySessionStore implements ISessionsStore {
         session = databaseStore.getSession(username, clientID, clientSession);
 
         if (session == null) {
+            if (!createWhenNoExist) {
+                return ErrorCode.ERROR_CODE_NOT_EXIST;
+            }
+
             session = databaseStore.createSession(username, clientID, clientSession);
         }
 

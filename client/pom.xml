@@ -6,14 +6,19 @@
         <relativePath>../</relativePath>
         <artifactId>wildfirechat-parent</artifactId>
         <groupId>cn.wildfirechat</groupId>
-        <version>0.12</version>
+        <version>0.25</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.wildfirechat</groupId>
     <artifactId>client</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>cn.wildfirechat</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

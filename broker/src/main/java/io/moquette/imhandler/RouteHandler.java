@@ -13,7 +13,7 @@ import com.hazelcast.core.Member;
 import io.moquette.spi.ClientSession;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import static io.moquette.BrokerConstants.HZ_Cluster_Node_External_IP;
@@ -32,7 +32,7 @@ public class RouteHandler extends IMHandler<WFCMessage.RouteRequest> {
         ClientSession clientSession = m_sessionsStore.sessionForClient(clientID);
         boolean isSessionAlreadyStored = clientSession != null;
         if (!isSessionAlreadyStored) {
-            m_sessionsStore.createNewSession(fromUser, clientID, true);
+            m_sessionsStore.createNewSession(fromUser, clientID, true, true);
         } else {
             m_sessionsStore.updateExistSession(fromUser, clientID, request, true);
         }

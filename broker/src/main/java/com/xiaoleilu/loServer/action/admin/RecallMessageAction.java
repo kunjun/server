@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -15,7 +16,7 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.RecallMessageData;
+import cn.wildfirechat.pojos.RecallMessageData;
 import io.moquette.persistence.RPCCenter;
 import io.moquette.persistence.TargetEntry;
 import io.netty.buffer.ByteBuf;
@@ -23,12 +24,12 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
 import java.util.concurrent.Executor;
 
-@Route("admin/message/recall")
+@Route(APIPath.Msg_Recall)
 @HttpMethod("POST")
 public class RecallMessageAction extends AdminAction {
 

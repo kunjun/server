@@ -9,25 +9,30 @@
 package io.moquette.imhandler;
 
 import cn.wildfirechat.proto.WFCMessage;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.xiaoleilu.loServer.pojos.GroupNotificationBinaryContent;
+import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
+import com.hazelcast.util.StringUtil;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
-
-import static io.moquette.BrokerConstants.MESSAGE_CONTENT_TYPE_CREATE_GROUP;
 
 @Handler(value = IMTopic.CreateGroupTopic)
 public class CreateGroupHandler extends GroupHandler<WFCMessage.CreateGroupRequest> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.CreateGroupRequest request, Qos1PublishHandler.IMCallback callback) {
+
+        if (!StringUtil.isNullOrEmpty(request.getGroup().getGroupInfo().getTargetId())) {
+            WFCMessage.GroupInfo existGroupInfo = m_messagesStore.getGroupInfo(request.getGroup().getGroupInfo().getTargetId());
+            if (existGroupInfo != null) {
+                return ErrorCode.ERROR_CODE_GROUP_ALREADY_EXIST;
+            }
+        }
         WFCMessage.GroupInfo groupInfo = m_messagesStore.createGroup(fromUser, request.getGroup().getGroupInfo(), request.getGroup().getMembersList());
         if (groupInfo != null) {
             if(request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, groupInfo.getTargetId(), request.getToLineList(), request.getNotifyContent());
             } else {
-                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(fromUser, groupInfo.getName(), "").getCreateGroupNotifyContent();
+                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(groupInfo.getTargetId(), fromUser, groupInfo.getName(), "").getCreateGroupNotifyContent();
                 sendGroupNotification(fromUser, groupInfo.getTargetId(), request.getToLineList(), content);
             }
         }

@@ -19,18 +19,20 @@ package io.moquette.spi.impl;
 import static io.moquette.spi.impl.Utils.readBytesAndRewind;
 import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
 import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
-import static win.liyufan.im.ErrorCode.ERROR_CODE_NOT_IMPLEMENT;
-import static win.liyufan.im.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
-import static win.liyufan.im.ErrorCode.ERROR_CODE_SUCCESS;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_NOT_IMPLEMENT;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 import cn.wildfirechat.server.ThreadPoolExecutorWrapper;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.action.ClassUtil;
-import com.xiaoleilu.loServer.pojos.OutputCheckUserOnline;
+import cn.wildfirechat.pojos.OutputCheckUserOnline;
 import io.moquette.persistence.RPCCenter;
 import io.moquette.imhandler.Handler;
 import io.moquette.imhandler.IMHandler;
@@ -39,6 +41,7 @@ import io.moquette.server.ConnectionDescriptor;
 import io.moquette.server.Server;
 import io.moquette.spi.ClientSession;
 import io.moquette.spi.impl.security.AES;
+import io.netty.handler.codec.mqtt.MqttVersion;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
@@ -56,7 +59,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 import win.liyufan.im.RateLimiter;
 import win.liyufan.im.Utility;
@@ -114,7 +117,7 @@ public class Qos1PublishHandler extends QosPublishHandler {
                     byte[] response = new byte[ackPayload.readableBytes()];
                     ackPayload.readBytes(response);
                     ReferenceCountUtil.release(ackPayload);
-                    RPCCenter.getInstance().sendResponse(ERROR_CODE_SUCCESS.getCode(), response, from, requestId);
+                    RPCCenter.getInstance().sendResponse(errorCode.getCode(), response, from, requestId);
                 }
             }, isAdmin);
         }
@@ -174,8 +177,23 @@ public class Qos1PublishHandler extends QosPublishHandler {
                             data = AES.AESEncrypt(data, "");
                         } else {
                             MemorySessionStore.Session session = m_sessionStore.getSession(clientID);
-                            if (session != null && session.getUsername().equals(fromUser))
-                            data = AES.AESEncrypt(data, session.getSecret());
+                            if (session != null && session.getUsername().equals(fromUser)) {
+                                if (data.length > 7*1024 && session.getMqttVersion() == MqttVersion.Wildfire_1) {
+                                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                    GZIPOutputStream gzip;
+                                    try {
+                                        gzip = new GZIPOutputStream(out);
+                                        gzip.write(data);
+                                        gzip.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    data = out.toByteArray();
+                                    code = (byte)ErrorCode.ERROR_CODE_SUCCESS_GZIPED.code;
+                                }
+
+                                data = AES.AESEncrypt(data, session.getSecret());
+                            }
                         }
                     }
                     ackPayload.clear();

@@ -8,6 +8,7 @@
 
 package io.moquette.imhandler;
 
+import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.WFCMessage;
 import cn.wildfirechat.server.ThreadPoolExecutorWrapper;
 import com.google.gson.Gson;
@@ -23,24 +24,19 @@ import io.netty.buffer.Unpooled;
 import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.RateLimiter;
 import win.liyufan.im.Utility;
 
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Consumer;
 
-import static win.liyufan.im.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
-import static win.liyufan.im.ErrorCode.ERROR_CODE_SUCCESS;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_OVER_FREQUENCY;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 
 /**
  * 请求处理接口<br>
@@ -210,9 +206,7 @@ abstract public class IMHandler<T> {
                     }
                 }
 
-                if(errorCode != ErrorCode.ERROR_CODE_ASYNC_HANDLER) {
-                    response(ackPayload, errorCode, callback);
-                }
+                response(ackPayload, errorCode, callback);
             } else {
                 LOG.error("Handler {} preAction failure", this.getClass().getName());
                 ByteBuf ackPayload = Unpooled.buffer(1);
@@ -244,8 +238,16 @@ abstract public class IMHandler<T> {
         Set<String> notifyReceivers = new LinkedHashSet<>();
 
         message = m_messagesStore.storeMessage(username, clientID, message);
-        int pullType = m_messagesStore.getNotifyReceivers(username, message, notifyReceivers);
-        this.publisher.publish2Receivers(message, notifyReceivers, clientID, pullType);
-        return message.getMessageId();
+        WFCMessage.Message.Builder messageBuilder = message.toBuilder();
+        int pullType = m_messagesStore.getNotifyReceivers(username, messageBuilder, notifyReceivers);
+        this.publisher.publish2Receivers(messageBuilder.build(), notifyReceivers, clientID, pullType);
+        return notifyReceivers.size();
+    }
+
+    protected long saveAndBroadcast(String username, String clientID, WFCMessage.Message message) {
+        Set<String> notifyReceivers = m_messagesStore.getAllEnds();
+        WFCMessage.Message updatedMessage = m_messagesStore.storeMessage(username, clientID, message);
+        mServer.getImBusinessScheduler().execute(() -> publisher.publish2Receivers(updatedMessage, notifyReceivers, clientID, ProtoConstants.PullType.Pull_Normal));
+        return notifyReceivers.size();
     }
 }

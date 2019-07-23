@@ -9,13 +9,13 @@
 package io.moquette.imhandler;
 
 import cn.wildfirechat.proto.WFCMessage;
-import com.xiaoleilu.loServer.pojos.GroupNotificationBinaryContent;
+import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
-import static win.liyufan.im.ErrorCode.ERROR_CODE_SUCCESS;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 
 @Handler(IMTopic.ModifyGroupAliasTopic)
 public class ModifyGroupAliasHandler extends GroupHandler<WFCMessage.ModifyGroupMemberAlias> {
@@ -26,7 +26,7 @@ public class ModifyGroupAliasHandler extends GroupHandler<WFCMessage.ModifyGroup
             if (request.hasNotifyContent()&& request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), request.getNotifyContent());
             } else {
-                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(fromUser, request.getAlias(), "").getModifyGroupMemberAliasNotifyContent();
+                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, request.getAlias(), "").getModifyGroupMemberAliasNotifyContent();
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), content);
             }
         }

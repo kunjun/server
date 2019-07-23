@@ -8,18 +8,19 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.InputOutputSensitiveWords;
+import cn.wildfirechat.pojos.InputOutputSensitiveWords;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 
-@Route("admin/sensitive/del")
+@Route(APIPath.Sensitive_Del)
 @HttpMethod("POST")
 public class SensitiveWordDeleteAction extends AdminAction {
 

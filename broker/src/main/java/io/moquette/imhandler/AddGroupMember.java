@@ -9,26 +9,25 @@
 package io.moquette.imhandler;
 
 import cn.wildfirechat.proto.WFCMessage;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.xiaoleilu.loServer.pojos.GroupNotificationBinaryContent;
+import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
-import static win.liyufan.im.ErrorCode.ERROR_CODE_SUCCESS;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 
 @Handler(value = IMTopic.AddGroupMemberTopic)
 public class AddGroupMember extends GroupHandler<WFCMessage.AddGroupMemberRequest> {
 
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.AddGroupMemberRequest request, Qos1PublishHandler.IMCallback callback) {
-        ErrorCode errorCode = m_messagesStore.addGroupMembers(fromUser, request.getGroupId(), request.getAddedMemberList());
+        ErrorCode errorCode = m_messagesStore.addGroupMembers(fromUser, isAdmin, request.getGroupId(), request.getAddedMemberList());
         if (errorCode == ERROR_CODE_SUCCESS) {
             if (request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), request.getNotifyContent());
             } else {
-                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(fromUser, null, getMemberIdList(request.getAddedMemberList())).getAddGroupNotifyContent();
+                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, null, getMemberIdList(request.getAddedMemberList())).getAddGroupNotifyContent();
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), content);
             }
         }

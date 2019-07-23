@@ -10,16 +10,12 @@ package io.moquette.imhandler;
 
 import cn.wildfirechat.proto.WFCMessage;
 import com.hazelcast.util.StringUtil;
-import com.xiaoleilu.loServer.pojos.GroupNotificationBinaryContent;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
-import win.liyufan.im.IDUtils;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
-import win.liyufan.im.UUIDGenerator;
 
 import static win.liyufan.im.IMTopic.PutUserSettingTopic;
-import static win.liyufan.im.UserSettingScope.kUserSettingListenedChannels;
 import static win.liyufan.im.UserSettingScope.kUserSettingMyChannels;
 
 @Handler(value = IMTopic.CreateChannelTopic)

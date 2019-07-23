@@ -8,8 +8,7 @@
 
 package win.liyufan.im;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Properties;
 
 public class GitRepositoryState {
@@ -63,8 +62,13 @@ public class GitRepositoryState {
 
     public static GitRepositoryState getGitRepositoryState() throws IOException {
         Properties properties = new Properties();
-        properties.load(new FileInputStream("config/git.properties"));
-//        properties.load(GitRepositoryState.class.getClassLoader().getResourceAsStream("config/git.properties"));
+        try {
+            InputStream inputStream = new FileInputStream("config/git.properties");
+            BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream));
+            properties.load(bf);
+        } catch (IOException e) {
+            
+        }
         GitRepositoryState gitRepositoryState = new GitRepositoryState(properties);
         return gitRepositoryState;
     }

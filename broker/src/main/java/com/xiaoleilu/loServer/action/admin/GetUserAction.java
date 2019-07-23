@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -15,15 +16,14 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.InputCreateUser;
-import com.xiaoleilu.loServer.pojos.InputGetUserInfo;
-import com.xiaoleilu.loServer.pojos.OutputCreateUser;
+import cn.wildfirechat.pojos.InputOutputUserInfo;
+import cn.wildfirechat.pojos.InputGetUserInfo;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 
-@Route("admin/user/info")
+@Route(APIPath.User_Get_Info)
 @HttpMethod("POST")
 public class GetUserAction extends AdminAction {
 
@@ -37,7 +37,7 @@ public class GetUserAction extends AdminAction {
         if (request.getNettyRequest() instanceof FullHttpRequest) {
             InputGetUserInfo inputUserId = getRequestBody(request.getNettyRequest(), InputGetUserInfo.class);
             if (inputUserId != null
-                && (!StringUtil.isNullOrEmpty(inputUserId.getUserId()) || !StringUtil.isNullOrEmpty(inputUserId.getName()))) {
+                && (!StringUtil.isNullOrEmpty(inputUserId.getUserId()) || !StringUtil.isNullOrEmpty(inputUserId.getName()) || !StringUtil.isNullOrEmpty(inputUserId.getMobile()))) {
 
                 WFCMessage.User user = null;
                 if(!StringUtil.isNullOrEmpty(inputUserId.getUserId())) {
@@ -53,7 +53,7 @@ public class GetUserAction extends AdminAction {
                 if (user == null) {
                     result = RestResult.resultOf(ErrorCode.ERROR_CODE_NOT_EXIST);
                 } else {
-                    result = RestResult.ok(InputCreateUser.fromPbUser(user));
+                    result = RestResult.ok(InputOutputUserInfo.fromPbUser(user));
                 }
 
                 response.setContent(new Gson().toJson(result));

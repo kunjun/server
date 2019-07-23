@@ -9,24 +9,24 @@
 package io.moquette.imhandler;
 
 import cn.wildfirechat.proto.WFCMessage;
-import com.xiaoleilu.loServer.pojos.GroupNotificationBinaryContent;
+import cn.wildfirechat.pojos.GroupNotificationBinaryContent;
 import io.moquette.spi.impl.Qos1PublishHandler;
 import io.netty.buffer.ByteBuf;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.IMTopic;
 
-import static win.liyufan.im.ErrorCode.ERROR_CODE_SUCCESS;
+import static cn.wildfirechat.common.ErrorCode.ERROR_CODE_SUCCESS;
 
 @Handler(IMTopic.TransferGroupTopic)
 public class TransferGroupHandler extends GroupHandler<WFCMessage.TransferGroupRequest> {
     @Override
     public ErrorCode action(ByteBuf ackPayload, String clientID, String fromUser, boolean isAdmin, WFCMessage.TransferGroupRequest request, Qos1PublishHandler.IMCallback callback) {
-        ErrorCode errorCode = m_messagesStore.transferGroup(fromUser, request.getGroupId(), request.getNewOwner());
+        ErrorCode errorCode = m_messagesStore.transferGroup(fromUser, request.getGroupId(), request.getNewOwner(), isAdmin);
         if (errorCode == ERROR_CODE_SUCCESS) {
             if (request.hasNotifyContent() && request.getNotifyContent().getType() > 0) {
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), request.getNotifyContent());
             } else {
-                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(fromUser, null, request.getNewOwner()).getTransferGroupNotifyContent();
+                WFCMessage.MessageContent content = new GroupNotificationBinaryContent(request.getGroupId(), fromUser, null, request.getNewOwner()).getTransferGroupNotifyContent();
                 sendGroupNotification(fromUser, request.getGroupId(), request.getToLineList(), content);
             }
         }

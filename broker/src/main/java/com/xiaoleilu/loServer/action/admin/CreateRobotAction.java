@@ -8,6 +8,7 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
 import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
@@ -15,15 +16,15 @@ import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.InputCreateRobot;
-import com.xiaoleilu.loServer.pojos.OutputCreateRobot;
+import cn.wildfirechat.pojos.InputCreateRobot;
+import cn.wildfirechat.pojos.OutputCreateRobot;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import win.liyufan.im.UUIDGenerator;
 
-@Route("admin/robot/create")
+@Route(APIPath.Create_Robot)
 @HttpMethod("POST")
 public class CreateRobotAction extends AdminAction {
 

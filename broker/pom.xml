@@ -5,7 +5,7 @@
         <relativePath>../</relativePath>
         <artifactId>wildfirechat-parent</artifactId>
         <groupId>cn.wildfirechat</groupId>
-        <version>0.12</version>
+        <version>0.25</version>
     </parent>
 
     <artifactId>moquette-broker</artifactId>
@@ -37,18 +37,17 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>cn.wildfirechat</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/log4j/log4j -->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.14</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.2</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
@@ -114,36 +113,6 @@
             <!-- 
             <classifier>${os.detected.name}-${os.detected.arch}</classifier>
              -->
-        </dependency>
-
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>3.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jvm</artifactId>
-            <version>3.2.2</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.librato.metrics</groupId>
-            <artifactId>metrics-librato</artifactId>
-            <version>5.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.bugsnag</groupId>
-            <artifactId>bugsnag</artifactId>
-            <version>[3.0,4.0)</version>
         </dependency>
 
         <dependency>
@@ -257,6 +226,18 @@
             <version>3.13.1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>5.2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.4.1</version>
+        </dependency>
 
     </dependencies>
 
@@ -342,7 +323,7 @@
                     <!--指定"git.properties"文件的存放路径(相对于${project.basedir}的一个路径);-->
                     <generateGitPropertiesFilename>config/git.properties</generateGitPropertiesFilename>
                     <!--".git"文件夹未找到时,构建是否失败;若设置true,则构建失败;若设置false,则跳过执行该目标;默认值:true;-->
-                    <failOnNoGitDirectory>true</failOnNoGitDirectory>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
 
                     <!--git描述配置,可选;由JGit提供实现;-->
                     <gitDescribe>

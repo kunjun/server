@@ -12,7 +12,7 @@ import io.moquette.persistence.remote.*;
 import io.moquette.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -73,7 +73,7 @@ public class RPCCenter {
                 info.future.cancel(true);
                 if (info.callback != null) {
                     info.callback.getResponseExecutor().execute(() -> {
-                        if (errorCode == 0) {
+                        if (errorCode == 0 || errorCode == ErrorCode.ERROR_CODE_SUCCESS_GZIPED.getCode()) {
                             info.callback.onSuccess(message);
                         } else {
                             info.callback.onError(ErrorCode.fromCode(errorCode));

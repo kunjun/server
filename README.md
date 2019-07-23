@@ -4,8 +4,8 @@
 
 | 仓库                                                         | 说明                                                    | 备注                                           |
 | ------------------------------------------------------------ | ------------------------------------------------------- | ---------------------------------------------- |
-| [android-chat](https://github.com/wildfirechat/android-chat) | 野火IM Android App                                      | 可以很方便地进行二次开发，或集成到现有应用当中 |
-| [ios-chat](https://github.com/wildfirechat/ios-chat)         | 野火IM iOS App                                          | 可以很方便地进行二次开发，或集成到现有应用当中 |
+| [android-chat](https://github.com/wildfirechat/android-chat) | 野火IM Android SDK源码和App源码                                      | 可以很方便地进行二次开发，或集成到现有应用当中 |
+| [ios-chat](https://github.com/wildfirechat/ios-chat)         | 野火IM iOS SDK源码和App源码                                          | 可以很方便地进行二次开发，或集成到现有应用当中 |
 | [pc-chat](https://github.com/wildfirechat/pc-chat)           | 基于[Electron](https://electronjs.org/)开发的PC平台应用 |                                                |
 | [proto](https://github.com/wildfirechat/proto)               | 野火IM的协议栈实现                                      |                                                |
 | [server](https://github.com/wildfirechat/server)             | IM server                                               |                                                |
@@ -24,7 +24,11 @@
 ### 联系我们
 问题讨论请加群：822762829
 
-<img src="http://static.wildfirechat.cn/qr_qqgroup.jpeg" width = 50% height = 50% />
+微信公众号：
+
+<img src="http://static.wildfirechat.cn/wx_wfc_qrcode.jpg" width = 50% height = 50% />
+
+> 强烈建议关注我们的公众号。我们有新版本发布或者有重大更新会通过公众号通知大家，另外我们也会不定期的发布一些关于野火IM的技术介绍。
 
 #### 体验Demo
 我们提供了体验demo，请使用微信扫码下载安装体验
@@ -56,6 +60,12 @@
 
 ## 编译
 在安装JDK1.8以上及maven的前提下，在命令行中执行```mvn clean compile package```，生成的目标文件在```./distribution/target/distribution-xxxx-bundle-tar.tar.gz```
+
+## 捐赠者名单
+
+| 捐赠者 | 商标 | 金额 | 简介 |
+| ----- | ---- | -------- | --- |
+| [SAMOS](http://samos.io) | ![SAMOS](http://static.wildfirechat.cn/SAMOS.png) | 保密 | 一站式区块链解决方案服务商(http://samos.io) |
 
 ## 特别感谢
 1. [moquette](https://github.com/moquette-io/moquette) 本项目是基于此项目二次开发而来，处理MQTT相关业务。

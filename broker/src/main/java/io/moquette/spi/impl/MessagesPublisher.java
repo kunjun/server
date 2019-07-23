@@ -21,8 +21,8 @@ import cn.wildfirechat.proto.WFCMessage;
 import com.google.gson.Gson;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.util.StringUtil;
-import com.xiaoleilu.loServer.pojos.OutputNotifyChannelSubscribeStatus;
-import com.xiaoleilu.loServer.pojos.SendMessageData;
+import cn.wildfirechat.pojos.OutputNotifyChannelSubscribeStatus;
+import cn.wildfirechat.pojos.SendMessageData;
 import io.moquette.persistence.*;
 import io.moquette.persistence.MemorySessionStore.Session;
 import io.moquette.server.ConnectionDescriptorStore;
@@ -308,7 +308,7 @@ public class MessagesPublisher {
                     }
 
                     if (isSlient) {
-                        LOG.info("The conversation is slient");
+                        LOG.info("Slient of user or conversation");
                         continue;
                     }
 
@@ -480,6 +480,10 @@ public class MessagesPublisher {
                 pushContent = "[视频]";
             } else if(type == ProtoConstants.ContentType.RichMedia) {
                 pushContent = "[图文]";
+            } else if(type == ProtoConstants.ContentType.File) {
+                pushContent = "[文件]";
+            } else if(type == ProtoConstants.ContentType.Sticker) {
+                pushContent = "[表情]";
             }
         }
 

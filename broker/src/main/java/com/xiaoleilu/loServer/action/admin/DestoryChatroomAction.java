@@ -8,21 +8,22 @@
 
 package com.xiaoleilu.loServer.action.admin;
 
+import cn.wildfirechat.common.APIPath;
 import com.google.gson.Gson;
 import com.xiaoleilu.loServer.RestResult;
 import com.xiaoleilu.loServer.annotation.HttpMethod;
 import com.xiaoleilu.loServer.annotation.Route;
 import com.xiaoleilu.loServer.handler.Request;
 import com.xiaoleilu.loServer.handler.Response;
-import com.xiaoleilu.loServer.pojos.InputDestoryChatroom;
+import cn.wildfirechat.pojos.InputDestoryChatroom;
 import io.moquette.spi.impl.Utils;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import win.liyufan.im.ErrorCode;
+import cn.wildfirechat.common.ErrorCode;
 
-@Route("/admin/chatroom")
-@HttpMethod("DELETE")
+@Route(APIPath.Chatroom_Destroy)
+@HttpMethod("POST")
 public class DestoryChatroomAction extends AdminAction {
 
     @Override
